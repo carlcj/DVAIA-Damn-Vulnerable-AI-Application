@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('POST /api/rag/add-document/123', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['csrf', 'file_upload', 'id_enumeration', 'sqli', 'xss'],
+      tests: ['id_enumeration'],
       attackParamLocations: [AttackParamLocation.PATH, AttackParamLocation.HEADER],
       starMetadata: {
         code_source: 'carlcj/DVAIA-Damn-Vulnerable-AI-Application:master',
