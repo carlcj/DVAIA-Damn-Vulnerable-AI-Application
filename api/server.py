@@ -1,7 +1,3 @@
-"""
-Flask API for DVAIA. Thin HTTP layer; delegates to app.*.
-Load .env via python -m api (api/__main__.py). PORT, DEFAULT_MODEL, OLLAMA_HOST.
-"""
 import os
 import tempfile
 from pathlib import Path
@@ -352,6 +348,8 @@ def api_rag_add_document(document_id):
     """Add a document to RAG: split into chunks, embed each, store. Returns number of chunks added."""
     _ensure_db()
     user_id = _user_id_from_session()
+    if not user_id:
+        return jsonify({"error": "Not logged in"}), 401
     doc = app_documents.get_document(document_id, user_id)
     if not doc:
         return jsonify({"error": "Document not found"}), 404
