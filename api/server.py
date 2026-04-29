@@ -1,8 +1,12 @@
+"""
+Flask API for DVAIA. Thin HTTP layer; delegates to app.*.
+Load .env via python -m api (api/__main__.py). PORT, DEFAULT_MODEL, OLLAMA_HOST.
+"""
 import os
 import tempfile
 from pathlib import Path
 
-from flask import Flask, request, jsonify, render_template, session, send_from_directory
+from flask import Flask, request, jsonify, render_template, session, send_from_directory, abort
 
 from core.config import get_agentic_model_id, get_default_model_id
 
@@ -40,7 +44,7 @@ def _user_id_from_session():
     return session.get("user_id")
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
     """Single-page front end: prompt input and output."""
     return render_template("index.html")
@@ -348,8 +352,6 @@ def api_rag_add_document(document_id):
     """Add a document to RAG: split into chunks, embed each, store. Returns number of chunks added."""
     _ensure_db()
     user_id = _user_id_from_session()
-    if not user_id:
-        return jsonify({"error": "Not logged in"}), 401
     doc = app_documents.get_document(document_id, user_id)
     if not doc:
         return jsonify({"error": "Document not found"}), 404
@@ -657,3 +659,9 @@ def run_app():
     _ensure_db()
     port = get_port()
     app.run(host="0.0.0.0", port=port)
+
+
+@app.before_request
+def block_options_method():
+    if request.method == 'OPTIONS':
+        abort(405)
